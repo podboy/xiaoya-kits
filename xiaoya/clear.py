@@ -18,7 +18,7 @@ from .utils import bytes_to_human_readable
 
 class clear_aliyundrive(aliyundrive_api):
     DEFAULT_MAX_RESERVED_FILE: int = 100
-    DEFAULT_MAX_RESERVED_BYTE: int = 10 * 1024 ** 3
+    DEFAULT_MAX_RESERVED_BYTE: int = 50 * 1024 ** 3
     DEFAULT_MAX_RESERVED_MINUTE: int = 24 * 60
     FORCE_RESERVED_SECOND: int = 60
 

@@ -3,7 +3,7 @@
 from urllib.parse import urljoin
 
 __project__ = "xiaoya"
-__version__ = "0.1"
+__version__ = "0.1.1"
 __description__ = "小雅 alist 部署和维护"
 __url_home__ = "https://github.com/podboy/xiaoya-kits"
 __url_code__ = __url_home__
