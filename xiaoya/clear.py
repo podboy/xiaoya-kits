@@ -99,13 +99,13 @@ class clear_aliyundrive(aliyundrive_api):
 def add_cmd_clear_aliyundrive(_arg: argp):
     _arg.add_argument("-f", "--file", dest="reserved_file", type=int,
                       help=f"最大保留的文件数，默认值为：{clear_aliyundrive.DEFAULT_MAX_RESERVED_FILE}",  # noqa
-                      nargs=1, metavar="DIR", default=[clear_aliyundrive.DEFAULT_MAX_RESERVED_FILE])  # noqa
+                      nargs=1, metavar="NUM", default=[clear_aliyundrive.DEFAULT_MAX_RESERVED_FILE])  # noqa
     _arg.add_argument("-b", "--byte", dest="reserved_byte", type=int,
-                      help=f"最大保留的空间，默认值为：{bytes_to_human_readable(clear_aliyundrive.DEFAULT_MAX_RESERVED_BYTE)}",  # noqa
-                      nargs=1, metavar="DIR", default=[clear_aliyundrive.DEFAULT_MAX_RESERVED_BYTE])
+                      help=f"最大保留的空间量，默认值为：{bytes_to_human_readable(clear_aliyundrive.DEFAULT_MAX_RESERVED_BYTE)}",  # noqa
+                      nargs=1, metavar="NUM", default=[clear_aliyundrive.DEFAULT_MAX_RESERVED_BYTE])  # noqa
     _arg.add_argument("-m", "--minute", dest="reserved_minute", type=int,
-                      help=f"最大保留的最小时间，默认值为：{clear_aliyundrive.DEFAULT_MAX_RESERVED_MINUTE}",  # noqa
-                      nargs=1, metavar="DIR", default=[clear_aliyundrive.DEFAULT_MAX_RESERVED_MINUTE])
+                      help=f"最大保留的分钟值，默认值为：{clear_aliyundrive.DEFAULT_MAX_RESERVED_MINUTE}",  # noqa
+                      nargs=1, metavar="NUM", default=[clear_aliyundrive.DEFAULT_MAX_RESERVED_MINUTE])  # noqa
 
 
 @run_command(add_cmd_clear_aliyundrive)
