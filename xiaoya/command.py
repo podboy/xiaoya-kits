@@ -2,7 +2,6 @@
 
 from typing import Optional
 from typing import Sequence
-import os
 
 from xarg import add_command
 from xarg import argp
@@ -18,10 +17,9 @@ from .clear import add_cmd_clear_aliyundrive
 
 @add_command(__project__)
 def add_cmd(_arg: argp):
-    default_root: str = os.path.join("volume", "xiaoya")
     _arg.add_argument("-r", "--root", dest="data_root", type=str,
-                      help=f"数据根目录，默认值为：{default_root}",
-                      nargs=1, metavar="DIR", default=[default_root])
+                      help=f"数据根目录，默认值为当前运行目录",
+                      nargs=1, metavar="DIR", default=["."])
 
 
 @run_command(add_cmd, add_cmd_clear_aliyundrive)
