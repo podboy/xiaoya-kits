@@ -21,6 +21,7 @@ class clear_aliyundrive(aliyundrive_api):
     DEFAULT_MAX_RESERVED_BYTE: int = 50 * 1024 ** 3
     DEFAULT_MAX_RESERVED_MINUTE: int = 24 * 60
     FORCE_RESERVED_SECOND: int = 60
+    FORCE_RESERVED_FILE: int = 3
 
     def __init__(self, data_root: str,
                  max_reserved_file: int = DEFAULT_MAX_RESERVED_FILE,
@@ -71,6 +72,10 @@ class clear_aliyundrive(aliyundrive_api):
             if len(reserved_stat.files) >= self.max_reserved_file:
                 commands().logger.debug(f"{file.file_id}：超过最大保留文件个数")
                 delete_files.append(file)
+                continue
+            if len(reserved_stat.files) < self.FORCE_RESERVED_FILE:
+                # 检测空间前至少保留一些文件，否则那些超大得文件将总是会被删除
+                reserved_stat.add(file)
                 continue
             if reserved_stat.size + file.size > self.max_reserved_byte:
                 commands().logger.debug(f"{file.file_id}：超过最大保留空间")
