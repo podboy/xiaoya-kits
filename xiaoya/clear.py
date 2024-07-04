@@ -1,6 +1,7 @@
 # coding:utf-8
 
 from datetime import datetime
+from time import sleep
 from typing import Iterable
 from typing import List
 from typing import Tuple
@@ -100,8 +101,9 @@ class clear_aliyundrive(aliyundrive_api):
         return stat
 
 
-@add_command("clear-aliyundrive", help="清理阿里云盘小雅转存文件")
+@add_command("clear-aliyundrive", help="清理阿里云盘中的小雅转存文件")
 def add_cmd_clear_aliyundrive(_arg: argp):
+    _arg.add_opt_on("--daemon", dest="daemon", help="守护模式（持续清理），默认单次清理")  # noqa
     _arg.add_argument("-f", "--file", dest="reserved_file", type=int,
                       help=f"最大保留的文件数，默认值为：{clear_aliyundrive.DEFAULT_MAX_RESERVED_FILE}",  # noqa
                       nargs=1, metavar="NUM", default=[clear_aliyundrive.DEFAULT_MAX_RESERVED_FILE])  # noqa
@@ -115,18 +117,27 @@ def add_cmd_clear_aliyundrive(_arg: argp):
 
 @run_command(add_cmd_clear_aliyundrive)
 def run_cmd_clear_aliyundrive(cmds: commands) -> int:
-    interface = clear_aliyundrive(
-        data_root=cmds.args.data_root[0],
-        max_reserved_file=cmds.args.reserved_file[0],
-        max_reserved_byte=cmds.args.reserved_byte[0],
-        max_reserved_minute=cmds.args.reserved_minute[0]
-    )
-    cmds.logger.info("扫描阿里云盘小雅转存文件")
-    for index, file in enumerate(interface.list_files()):
-        cmds.logger.debug(f"{index}: {file.file_id}, {file.created_at}, {file.updated_at}, {file.type}, {file.name}")  # noqa
-    cmds.logger.info("过滤阿里云盘小雅转存文件")
-    todo: Tuple[aliyundrive_file, ...] = interface.filter()
-    cmds.logger.info("清理阿里云盘小雅转存文件")
-    stat: aliyundrive_stat = interface.delete(todo)
-    cmds.logger.info(f"本次共清理 {len(stat.files)} 个文件和 {len(stat.folders)} 个文件夹，总计 {stat.readable_size} 空间")  # noqa
+    while True:
+        try:
+            interface = clear_aliyundrive(
+                data_root=cmds.args.data_root[0],
+                max_reserved_file=cmds.args.reserved_file[0],
+                max_reserved_byte=cmds.args.reserved_byte[0],
+                max_reserved_minute=cmds.args.reserved_minute[0]
+            )
+            cmds.logger.info("扫描阿里云盘小雅转存文件")
+            for index, file in enumerate(interface.list_files()):
+                cmds.logger.debug(f"{index}: {file.file_id}, {file.created_at}, {file.updated_at}, {file.type}, {file.name}")  # noqa
+            cmds.logger.info("过滤阿里云盘小雅转存文件")
+            todo: Tuple[aliyundrive_file, ...] = interface.filter()
+            cmds.logger.info("清理阿里云盘小雅转存文件")
+            stat: aliyundrive_stat = interface.delete(todo)
+            cmds.logger.info(f"本次共清理 {len(stat.files)} 个文件和 {len(stat.folders)} 个文件夹，总计 {stat.readable_size} 空间")  # noqa
+            if not cmds.args.daemon:
+                break
+        except Exception as e:
+            cmds.logger.error(f"清理阿里云盘小雅转存文件出错：{e}")
+            if not cmds.args.daemon:
+                raise
+        sleep(60)  # TODO: 动态休眠
     return 0

@@ -72,12 +72,21 @@
 
 ```bash
 pip3 install --upgrade xiaoya && xiaoya --version
-xiaoya clear-aliyundrive --stdout --debug
+xiaoya clear-aliyundrive --stdout
 ```
 
 ### ⏱️ 定时清理
 
 您可以将 `xiaoya clear-aliyundrive` 命令添加到 `crontab` 中，实现定时清理。
+
+### 🪐 持续清理（守护模式）
+
+在小雅数据目录下执行以下命令，使用守护模式持续清理，按 `ctrl+c` 退出：
+
+```bash
+pip3 install --upgrade xiaoya && xiaoya --version
+xiaoya clear-aliyundrive --stdout --daemon
+```
 
 ### docker 部署
 
