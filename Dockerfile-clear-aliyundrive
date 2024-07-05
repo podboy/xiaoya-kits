@@ -1,0 +1,9 @@
+FROM ghcr.io/podboy/python:3.10-alpine
+
+ARG XIAOYA_VERSION
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir xiaoya=="$XIAOYA_VERSION"
+
+CMD xiaoya --root /etc/xiaoya clear-aliyundrive --stdout --daemon

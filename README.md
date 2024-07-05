@@ -90,4 +90,6 @@ xiaoya clear-aliyundrive --stdout --daemon
 
 ### docker 部署
 
-> 想要在 docker 中运行需要守护模式，此功能正在开发，敬请期待！
+```bash
+docker run -v <xiaoya_config_path>:/etc/xiaoya --name xiaoya-clear ghcr.io/podboy/xiaoya-clear:latest
+```
