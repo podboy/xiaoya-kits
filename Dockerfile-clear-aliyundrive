@@ -6,4 +6,4 @@ WORKDIR /app
 
 RUN pip install --no-cache-dir xiaoya=="$XIAOYA_VERSION"
 
-CMD xiaoya --root /etc/xiaoya clear-aliyundrive --stdout --daemon
+CMD xiaoya --root /etc/xiaoya clear-aliyundrive --stdout --format --daemon

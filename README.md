@@ -72,7 +72,7 @@
 
 ```bash
 pip3 install --upgrade xiaoya && xiaoya --version
-xiaoya clear-aliyundrive --stdout
+xiaoya clear-aliyundrive --stdout --format
 ```
 
 ### ⏱️ 定时清理
@@ -85,7 +85,7 @@ xiaoya clear-aliyundrive --stdout
 
 ```bash
 pip3 install --upgrade xiaoya && xiaoya --version
-xiaoya clear-aliyundrive --stdout --daemon
+xiaoya clear-aliyundrive --stdout --format --daemon
 ```
 
 ### docker 部署

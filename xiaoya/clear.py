@@ -168,5 +168,6 @@ def run_cmd_clear_aliyundrive(cmds: commands) -> int:
             if not cmds.args.daemon:
                 raise
             interval = DEFAULT_MIN_INTERVAL_SECOND  # 清理失败，尽快重试
+        cmds.logger.info(f"休眠 {int(interval)} 秒")
         sleep(interval)  # 动态休眠
     return 0
