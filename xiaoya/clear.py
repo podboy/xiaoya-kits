@@ -17,6 +17,10 @@ from .aliyundrive import aliyundrive_stat
 from .utils import bytes_to_human_readable
 
 
+DEFAULT_MIN_INTERVAL_SECOND: int = 30
+DEFAULT_MAX_INTERVAL_SECOND: int = 300
+
+
 class clear_aliyundrive(aliyundrive_api):
     DEFAULT_MAX_RESERVED_FILE: int = 100
     DEFAULT_MAX_RESERVED_BYTE: int = 50 * 1024 ** 3
@@ -103,27 +107,49 @@ class clear_aliyundrive(aliyundrive_api):
 
 @add_command("clear-aliyundrive", help="清理阿里云盘中的小雅转存文件")
 def add_cmd_clear_aliyundrive(_arg: argp):
-    _arg.add_opt_on("--daemon", dest="daemon", help="守护模式（持续清理），默认单次清理")  # noqa
+    _arg.add_opt_on("--daemon", dest="daemon", help="守护模式（持续清理），默认是单次清理")  # noqa
+    _arg.add_argument("--max-interval", dest="max_interval", type=int,
+                      help=f"守护模式下两次清理的最大间隔时间，默认值为：{DEFAULT_MAX_INTERVAL_SECOND}，单位秒",  # noqa
+                      nargs=1, metavar="NUM", default=[DEFAULT_MAX_INTERVAL_SECOND])  # noqa
     _arg.add_argument("-f", "--file", dest="reserved_file", type=int,
                       help=f"最大保留的文件数，默认值为：{clear_aliyundrive.DEFAULT_MAX_RESERVED_FILE}",  # noqa
                       nargs=1, metavar="NUM", default=[clear_aliyundrive.DEFAULT_MAX_RESERVED_FILE])  # noqa
     _arg.add_argument("-b", "--byte", dest="reserved_byte", type=int,
-                      help=f"最大保留的空间量，默认值为：{bytes_to_human_readable(clear_aliyundrive.DEFAULT_MAX_RESERVED_BYTE)}",  # noqa
+                      help=f"最大保留的空间量，默认值为：{bytes_to_human_readable(clear_aliyundrive.DEFAULT_MAX_RESERVED_BYTE)}，单位字节数",  # noqa
                       nargs=1, metavar="NUM", default=[clear_aliyundrive.DEFAULT_MAX_RESERVED_BYTE])  # noqa
     _arg.add_argument("-m", "--minute", dest="reserved_minute", type=int,
-                      help=f"最大保留的分钟值，默认值为：{clear_aliyundrive.DEFAULT_MAX_RESERVED_MINUTE}",  # noqa
+                      help=f"最大保留的分钟值，默认值为：{clear_aliyundrive.DEFAULT_MAX_RESERVED_MINUTE}，单位分钟",  # noqa
                       nargs=1, metavar="NUM", default=[clear_aliyundrive.DEFAULT_MAX_RESERVED_MINUTE])  # noqa
 
 
 @run_command(add_cmd_clear_aliyundrive)
 def run_cmd_clear_aliyundrive(cmds: commands) -> int:
+    data_root: str = cmds.args.data_root[0]
+    max_interval: int = cmds.args.max_interval[0]  # 最大休眠间隔时间，单位秒
+    reserved_file: int = cmds.args.reserved_file[0]
+    reserved_byte: int = cmds.args.reserved_byte[0]
+    reserved_minute: int = cmds.args.reserved_minute[0]
+
+    interval: float = DEFAULT_MIN_INTERVAL_SECOND * 2  # 休眠间隔时间初始值，单位秒
+
+    def calc_sleep_interval(prev: float, rate: float) -> float:
+        if rate >= 0.8:
+            prev /= 2  # 清理文件过多，休眠时间倍减
+        elif rate >= 0.5:
+            prev -= DEFAULT_MIN_INTERVAL_SECOND * rate  # 清理文件过多，休眠时间减少
+        elif rate >= 0.2:
+            prev += DEFAULT_MIN_INTERVAL_SECOND * (1.0 - rate)  # 清理文件过少，休眠时间增加
+        else:
+            prev *= 2  # 清理文件过少，休眠时间倍增
+        return min(max(DEFAULT_MIN_INTERVAL_SECOND, prev), max_interval)  # noqa
+
     while True:
         try:
             interface = clear_aliyundrive(
-                data_root=cmds.args.data_root[0],
-                max_reserved_file=cmds.args.reserved_file[0],
-                max_reserved_byte=cmds.args.reserved_byte[0],
-                max_reserved_minute=cmds.args.reserved_minute[0]
+                data_root=data_root,
+                max_reserved_file=reserved_file,
+                max_reserved_byte=reserved_byte,
+                max_reserved_minute=reserved_minute
             )
             cmds.logger.info("扫描阿里云盘小雅转存文件")
             for index, file in enumerate(interface.list_files()):
@@ -134,10 +160,13 @@ def run_cmd_clear_aliyundrive(cmds: commands) -> int:
             stat: aliyundrive_stat = interface.delete(todo)
             cmds.logger.info(f"本次共清理 {len(stat.files)} 个文件和 {len(stat.folders)} 个文件夹，总计 {stat.readable_size} 空间")  # noqa
             if not cmds.args.daemon:
-                break
+                break  # 退出单次运行
+            # 根据清理文件的大小计算休眠时间
+            interval = calc_sleep_interval(interval, stat.size / reserved_byte)
         except Exception as e:
             cmds.logger.error(f"清理阿里云盘小雅转存文件出错：{e}")
             if not cmds.args.daemon:
                 raise
-        sleep(60)  # TODO: 动态休眠
+            interval = DEFAULT_MIN_INTERVAL_SECOND  # 清理失败，尽快重试
+        sleep(interval)  # 动态休眠
     return 0
