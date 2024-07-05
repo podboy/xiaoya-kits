@@ -27,6 +27,11 @@ build-clean:
 build: build-requirements build-clean
 	xpip-build --debug setup --all
 
+build-image:
+	git checkout image
+	git reset --hard origin/master
+	git push -f origin image
+	git checkout master
 
 install:
 	pip3 install dist/*.whl

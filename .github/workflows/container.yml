@@ -36,7 +36,7 @@ jobs:
           ref: "image"
 
       - name: Build Image
-        run: docker build --build-arg XIAOYA_VERSION==$(cat docker-tag-clear-aliyundrive) -f Dockerfile-clear-aliyundrive -t ghcr.io/podboy/xiaoya-clear:$(cat docker-tag-clear-aliyundrive) -t ghcr.io/podboy/xiaoya-clear:latest .
+        run: docker build --build-arg XIAOYA_VERSION=$(cat docker-tag-clear-aliyundrive) -f Dockerfile-clear-aliyundrive -t ghcr.io/podboy/xiaoya-clear:$(cat docker-tag-clear-aliyundrive) -t ghcr.io/podboy/xiaoya-clear:latest .
 
       - name: List all images
         run: docker image ls
