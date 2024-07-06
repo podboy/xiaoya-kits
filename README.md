@@ -93,3 +93,12 @@ xiaoya clear-aliyundrive --stdout --format --daemon
 ```bash
 docker run -v <xiaoya_config_path>:/etc/xiaoya --name xiaoya-clear ghcr.io/podboy/xiaoya-clear:latest
 ```
+
+环境变量：
+
+- `ROOT`：xiaoya 配置文件目录，默认 `/etc/xiaoya`
+- `LEVEL`：日志级别，默认 `info`
+- `MAX_INTERVAL`：两次清理的最大间隔时间，单位秒，默认 `300`
+- `MAX_RESERVED_FILE`：每次清理最大保留的文件数，默认 `100`
+- `MAX_RESERVED_BYTE`：每次清理最大保留的空间量，单位字节，默认 `53687091200`
+- `MAX_RESERVED_MINUTE`：每次清理大保留的分钟值，默认 `1440`

@@ -2,8 +2,15 @@ FROM ghcr.io/podboy/python:3.10-alpine
 
 ARG XIAOYA_VERSION
 
+ENV ROOT=/etc/xiaoya
+ENV LEVEL=info
+ENV MAX_INTERVAL=300
+ENV MAX_RESERVED_FILE=100
+ENV MAX_RESERVED_BYTE=53687091200
+ENV MAX_RESERVED_MINUTE=1440
+
 WORKDIR /app
 
-RUN pip install --no-cache-dir xiaoya=="$XIAOYA_VERSION"
+RUN pip install --no-cache-dir xiaoya==$XIAOYA_VERSION
 
-CMD xiaoya --root /etc/xiaoya clear-aliyundrive --stdout --format --daemon
+CMD xiaoya --root ${ROOT} clear-aliyundrive --stdout --format --level ${LEVEL} --daemon --max-interval ${MAX_INTERVAL} --file ${MAX_RESERVED_FILE} --byte ${MAX_RESERVED_BYTE} --minute ${MAX_RESERVED_MINUTE}
