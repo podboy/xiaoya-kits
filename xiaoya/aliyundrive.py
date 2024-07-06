@@ -244,8 +244,6 @@ class aliyundrive_api:
             "drive_id": self.resource_drive_id,
             "parent_file_id": self.folder_id})
         self.__files = [aliyundrive_file(file) for file in response["items"]]
-        stat: aliyundrive_stat = aliyundrive_stat(self.files)
-        cmds.logger.info(f"扫描到 {len(stat.files)} 个文件和 {len(stat.folders)} 个文件夹，总计 {stat.readable_size} 空间")  # noqa
         return self.files
 
     def __delete(self, file_id: str):

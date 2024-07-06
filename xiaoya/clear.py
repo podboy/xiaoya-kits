@@ -133,14 +133,14 @@ def run_cmd_clear_aliyundrive(cmds: commands) -> int:
     interval: float = DEFAULT_MIN_INTERVAL_SECOND * 2  # 休眠间隔时间初始值，单位秒
 
     def calc_sleep_interval(prev: float, rate: float) -> float:
-        if rate >= 0.8:
-            prev /= 2  # 清理文件过多，休眠时间倍减
-        elif rate >= 0.5:
-            prev -= DEFAULT_MIN_INTERVAL_SECOND * rate  # 清理文件过多，休眠时间减少
-        elif rate >= 0.2:
-            prev += DEFAULT_MIN_INTERVAL_SECOND * (1.0 - rate)  # 清理文件过少，休眠时间增加
-        else:
-            prev *= 2  # 清理文件过少，休眠时间倍增
+        if rate >= 0.8:  # 待清理文件过多，休眠时间倍减
+            prev /= 2
+        elif rate >= 0.5:  # 待清理文件较多，休眠时间减少
+            prev -= DEFAULT_MIN_INTERVAL_SECOND * rate
+        elif rate >= 0.2:  # 待清理文件较少，休眠时间增加
+            prev += DEFAULT_MIN_INTERVAL_SECOND * (1.0 - rate)
+        else:  # 待清理文件过少，休眠时间倍增
+            prev *= 2
         return min(max(DEFAULT_MIN_INTERVAL_SECOND, prev), max_interval)  # noqa
 
     while True:
@@ -154,15 +154,17 @@ def run_cmd_clear_aliyundrive(cmds: commands) -> int:
             cmds.logger.info("扫描阿里云盘小雅转存文件")
             for index, file in enumerate(interface.list_files()):
                 cmds.logger.debug(f"{index}: {file.file_id}, {file.created_at}, {file.updated_at}, {file.type}, {file.name}")  # noqa
+            stat: aliyundrive_stat = aliyundrive_stat(interface.files)
+            # 根据扫描出的文件大小计算休眠时间
+            interval = calc_sleep_interval(interval, stat.size / reserved_byte)
+            cmds.logger.info(f"扫描到 {len(stat.files)} 个文件和 {len(stat.folders)} 个文件夹，总计 {stat.readable_size} 空间")  # noqa
             cmds.logger.info("过滤阿里云盘小雅转存文件")
             todo: Tuple[aliyundrive_file, ...] = interface.filter()
             cmds.logger.info("清理阿里云盘小雅转存文件")
-            stat: aliyundrive_stat = interface.delete(todo)
-            cmds.logger.info(f"本次共清理 {len(stat.files)} 个文件和 {len(stat.folders)} 个文件夹，总计 {stat.readable_size} 空间")  # noqa
+            done: aliyundrive_stat = interface.delete(todo)
+            cmds.logger.info(f"本次共清理 {len(done.files)} 个文件和 {len(done.folders)} 个文件夹，总计 {done.readable_size} 空间")  # noqa
             if not cmds.args.daemon:
                 break  # 退出单次运行
-            # 根据清理文件的大小计算休眠时间
-            interval = calc_sleep_interval(interval, stat.size / reserved_byte)
         except Exception as e:
             cmds.logger.error(f"清理阿里云盘小雅转存文件出错：{e}")
             if not cmds.args.daemon:
