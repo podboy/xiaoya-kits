@@ -153,7 +153,8 @@ def run_cmd_clear_aliyundrive(cmds: commands) -> int:
             )
             cmds.logger.info("扫描阿里云盘小雅转存文件")
             for index, file in enumerate(interface.list_files()):
-                cmds.logger.debug(f"{index}: {file.file_id}, {file.created_at}, {file.updated_at}, {file.type}, {file.name}")  # noqa
+                cmds.logger.debug(f"{index}: {file.info}")
+                # cmds.logger.debug(f"{index}: {file.file_id}, {file.created_at}, {file.updated_at}, {file.type}, {file.name}")  # noqa
             stat: aliyundrive_stat = aliyundrive_stat(interface.files)
             # 根据扫描出的文件大小计算休眠时间
             interval = calc_sleep_interval(interval, stat.size / reserved_byte)

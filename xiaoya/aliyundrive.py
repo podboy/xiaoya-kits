@@ -233,6 +233,7 @@ class aliyundrive_api:
         ).post(self.URL_V1_FILE_GET_PATH, data={
             "drive_id": self.resource_drive_id,
             "file_id": file_id})
+        cmds.logger.debug(f"file {file_id} get_path: {response}")
         items: List[str] = [item["name"] for item in response["items"]]
         items.reverse()
         return os.path.join(*items)
