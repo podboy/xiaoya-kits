@@ -102,3 +102,15 @@ docker run -v <xiaoya_config_path>:/etc/xiaoya --name xiaoya-clear ghcr.io/podbo
 - `MAX_RESERVED_FILE`：每次清理最大保留的文件数，默认 `100`
 - `MAX_RESERVED_BYTE`：每次清理最大保留的空间量，单位字节，默认 `53687091200`
 - `MAX_RESERVED_MINUTE`：每次清理大保留的分钟值，默认 `1440`
+
+**docker-compose**
+
+```yaml
+version: '3'
+services:
+    podboy:
+        image: 'ghcr.io/podboy/xiaoya-clear:latest'
+        container_name: xiaoya-clear
+        volumes:
+            - '<xiaoya_config_path>:/etc/xiaoya'
+```
