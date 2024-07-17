@@ -18,7 +18,7 @@ from .clear import add_cmd_clear_aliyundrive
 @add_command(__project__)
 def add_cmd(_arg: argp):
     _arg.add_argument("-r", "--root", dest="data_root", type=str,
-                      help=f"数据根目录，默认值为当前运行目录",
+                      help="数据根目录，默认值为当前运行目录",
                       nargs=1, metavar="DIR", default=["."])
 
 
